@@ -12,11 +12,14 @@ import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryNTimes;
+import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: George.Z.Lin, Jay.H.Zou
@@ -153,9 +156,12 @@ public class ZKService implements IZKService {
         try {
             String zkPath = param.getZkPath();
             Stat stat = client.checkExists().forPath(zkPath);
+            List<ACL> aclList = client.getACL().forPath(zkPath);
+            Map<String, Object> map = new HashMap<>();
+            map.put("Stat", stat);
+            map.put("ACL", aclList);
+            jsonObject.put(Constants.STAT, map);
             byte[] bytes = client.getData().forPath(zkPath);
-            jsonObject.put(Constants.STAT, stat);
-            System.out.println(new String(bytes));
             jsonObject.put(Constants.DATA, new String(bytes));
         } catch (Exception e) {
             logger.error("Get detail error.", e);
